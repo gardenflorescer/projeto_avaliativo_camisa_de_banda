@@ -1,83 +1,409 @@
-import 'package:flutter/material.dart';
-import '../datasources/product_datasource.dart';
+import 'package:flutter/material';
+import '../datasources/product_datasource.dart'; // Mude para '../app/data/datasource/product_datasource.dart' caso use a estrutura da imagem
 import '../models/product_model.dart';
 
 class ProductGridScreen extends StatefulWidget {
-  const ProductGridScreen({super.key});
+  const ProductGridScreen({Key? key}) : super(key: key);
 
   @override
   State<ProductGridScreen> createState() => _ProductGridScreenState();
 }
 
 class _ProductGridScreenState extends State<ProductGridScreen> {
-  // Instancia o datasource e busca a lista de entidades convertidas
-  final List<ProductModel> products = ProductRemoteDatasource().getProducts();
+  final ProductDatasource _datasource = ProductDatasource();
+  List<ProductModel> _allProducts = [];
+  List<ProductModel> _filteredProducts = [];
+
+  bool _isGridView = true;
+  String _searchQuery = "";
+  double _minPrice = 0.0;
+  double _maxPrice = 200.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  void _loadProducts() {
+    try {
+      final rawData = _datasource.getRawProducts();
+      setState(() {
+        _allProducts = rawData
+            .map((item) => ProductModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+        _filteredProducts = List.from(_allProducts);
+      });
+    } catch (e) {
+      debugPrint("Erro ao carregar produtos: $e");
+    }
+  }
+
+  void _filterProducts() {
+    setState(() {
+      _filteredProducts = _allProducts.where((product) {
+        final matchesTitle = product.titulo
+            .toLowerCase()
+            .contains(_searchQuery.toLowerCase());
+        final matchesPrice = product.preco >= _minPrice && product.preco <= _maxPrice;
+        return matchesTitle && matchesPrice;
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Camisas de Banda'),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: GridView.builder(
-          itemCount: products.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // 2 itens por linha
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.75, // Ajuste de proporção do card
+        title: const Text(
+          "Catálogo de Camisas",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
+            tooltip: _isGridView ? "Exibir como Lista" : "Exibir como Grade",
+            onPressed: () {
+              setState(() {
+                _isGridView = !_isGridView;
+              });
+            },
           ),
-          itemBuilder: (context, index) {
-            final product = products[index];
-            return Card(
-              clipBehavior: Clip.antiAlias,
-              elevation: 4,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Imagem do produto (Placeholder caso a imagem local não exista)
-                  Expanded(
-                    child: Container(
-                      color: Colors.grey[800],
-                      width: double.infinity,
-                      child: const Icon(Icons.album, size: 50, color: Colors.white54),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Barra de Pesquisa e Filtros de Preço (RF04)
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  children: [
+                    // Campo de Pesquisa por Título (RF04.1)
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: "Pesquisar por título...",
+                        prefixIcon: const Icon(Icons.search, color: Colors.blueAccent),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      onChanged: (val) {
+                        _searchQuery = val;
+                        _filterProducts();
+                      },
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 12),
+                    // Filtros de Preço Mín/Máx (RF04.2)
+                    Row(
                       children: [
-                        Text(
-                          product.titulo,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Preço Mín: R$ ${_minPrice.toStringAsFixed(0)}",
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                              ),
+                              Slider(
+                                value: _minPrice,
+                                min: 0.0,
+                                max: 200.0,
+                                activeColor: Colors.blueAccent,
+                                onChanged: (val) {
+                                  if (val <= _maxPrice) {
+                                    setState(() {
+                                      _minPrice = val;
+                                      _filterProducts();
+                                    });
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'R\$ ${product.preco.toStringAsFixed(2)}',
-                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          product.disponivel ? 'Disponível' : 'Esgotado',
-                          style: TextStyle(
-                            color: product.disponivel ? Colors.blue : Colors.red,
-                            fontSize: 12,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Preço Máx: R$ ${_maxPrice.toStringAsFixed(0)}",
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                              ),
+                              Slider(
+                                value: _maxPrice,
+                                min: 0.0,
+                                max: 200.0,
+                                activeColor: Colors.blueAccent,
+                                onChanged: (val) {
+                                  if (val >= _minPrice) {
+                                    setState(() {
+                                      _maxPrice = val;
+                                      _filterProducts();
+                                    });
+                                  }
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Listagem das Camisetas com Lazy Loading simulado pelo ListView/GridView.builder (RF02, RF03)
+          Expanded(
+            child: _filteredProducts.isEmpty
+                ? const Center(
+                    child: Text(
+                      "Nenhuma camisa encontrada.",
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  )
+                : _isGridView
+                    ? GridView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.72,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        itemCount: _filteredProducts.length,
+                        itemBuilder: (context, index) {
+                          return _buildProductCard(_filteredProducts[index]);
+                        },
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        itemCount: _filteredProducts.length,
+                        itemBuilder: (context, index) {
+                          return _buildProductListTile(_filteredProducts[index]);
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Construtor com fallback inteligente para carregar tanto fotos locais quanto da web (RF05.1)
+  Widget _buildProductImage(String url) {
+    if (url.startsWith('assets/')) {
+      return Image.asset(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[200],
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.image, color: Colors.grey, size: 30),
+                  SizedBox(height: 4),
+                  Text(
+                    "Adicione a imagem na pasta assets",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 9, color: Colors.grey),
                   ),
                 ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
+      );
+    } else {
+      return Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[200],
+            child: const Center(
+              child: Icon(
+                Icons.broken_image,
+                color: Colors.grey,
+                size: 30,
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  Widget _buildProductCard(ProductModel product) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _buildProductImage(product.imagemUrl),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.titulo,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 4),
+                // Formatação de Dinheiro R$ (RF05.2)
+                Text(
+                  "R$ ${product.preco.toStringAsFixed(2).replaceAll('.', ',')}",
+                  style: const TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Botão de Comprar ou Indisponível (RF05.3)
+                SizedBox(
+                  width: double.infinity,
+                  height: 32,
+                  child: product.disponivel
+                      ? ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          onPressed: () {
+                            // Navegação via rota nomeada para tela de compra (RF06)
+                            Navigator.pushNamed(
+                              context,
+                              '/compra',
+                              arguments: product,
+                            );
+                          },
+                          child: const Text("Comprar", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        )
+                      : Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            "Indisponível",
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductListTile(ProductModel product) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            height: 100,
+            child: _buildProductImage(product.imagemUrl),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.titulo,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "R$ ${product.preco.toStringAsFixed(2).replaceAll('.', ',')}",
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: product.disponivel
+                ? ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/compra',
+                        arguments: product,
+                      );
+                    },
+                    child: const Text("Comprar", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  )
+                : Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      "Indisponível",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+          )
+        ],
       ),
     );
   }

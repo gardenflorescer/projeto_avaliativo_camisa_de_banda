@@ -1,27 +1,30 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material';
 import 'screens/product_grid_screen.dart';
+import 'screens/product_buy_screen.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Catálogo de Camisas Flutter',
       debugShowCheckedModeBanner: false,
-      title: 'Loja de Camisas',
-      // Define um tema Dark elegante condizente com camisas de rock/metal
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1A1A1A),
-          elevation: 0,
-        ),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+        fontFamily: 'Inter',
+        useMaterial3: true,
       ),
-      home: const ProductGridScreen(),
+      // Definindo as rotas nomeadas do aplicativo (RF06, RF07)
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const ProductGridScreen(),
+        '/compra': (context) => const ProductBuyScreen(),
+      },
     );
   }
 }
