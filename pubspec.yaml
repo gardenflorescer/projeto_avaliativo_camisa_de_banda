@@ -21,3 +21,13 @@ flutter:
   # Configuração dos assets para o projeto Flutter (RF05.1)
   assets:
     - assets/images/
+    - assets/images/alice_in_chains.jpg
+    - assets/images/bauhaus.jpg
+    - assets/images/black_sabbath.jpg
+    - assets/images/blind_guardian.jpg
+    - assets/images/helloween.jpg
+    - assets/images/rammstein.jpg
+    - assets/images/sisters_of_mercy.jpg
+    - assets/images/the_doors.jpg
+    - assets/images/the_who.jpg
+    - assets/images/type_o_negative.jpg
