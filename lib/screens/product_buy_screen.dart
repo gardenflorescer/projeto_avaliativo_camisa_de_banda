@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:flutter/material';
+import 'package:flutter/material.dart'; // ✅ Corrigido!
 import '../models/product_model.dart';
 
 class ProductBuyScreen extends StatefulWidget {
-  const ProductBuyScreen({Key? key}) : super(key: key);
+  const ProductBuyScreen({super.key});
 
   @override
   State<ProductBuyScreen> createState() => _ProductBuyScreenState();
@@ -29,7 +29,7 @@ class _ProductBuyScreenState extends State<ProductBuyScreen> {
     super.dispose();
   }
 
-  // Validação do RF12: Mínimo 4 caracteres sem contar espaços em branco no início e final (.trim())
+  // Validação conforme o RF12: Mínimo 4 caracteres sem contar espaços em branco no início e final
   String? _validarCampo(String? valor, String nomeCampo) {
     if (valor == null) return "Campo obrigatório";
     final valorFiltrado = valor.trim();
@@ -81,7 +81,7 @@ class _ProductBuyScreenState extends State<ProductBuyScreen> {
     });
   }
 
-  // Construtor da Imagem do Produto
+  // Construtor do widget da imagem com fallback automático local/remoto (RF05.1)
   Widget _buildProductImage(String url) {
     if (url.startsWith('assets/')) {
       return Image.asset(
@@ -146,6 +146,7 @@ class _ProductBuyScreenState extends State<ProductBuyScreen> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
+                      // Imagem da camiseta
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: SizedBox(
@@ -155,6 +156,7 @@ class _ProductBuyScreenState extends State<ProductBuyScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
+                      // Título e Preço Unitário
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,7 +167,7 @@ class _ProductBuyScreenState extends State<ProductBuyScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "Preço Unitário: R$ ${product.preco.toStringAsFixed(2).replaceAll('.', ',')}",
+                              "Preço Unitário: R\$ ${product.preco.toStringAsFixed(2).replaceAll('.', ',')}",
                               style: const TextStyle(color: Colors.grey, fontSize: 14),
                             ),
                           ],
@@ -285,8 +287,8 @@ class _ProductBuyScreenState extends State<ProductBuyScreen> {
                   final double jur = p > 1 ? 0.005 * (p - 1) : 0.0;
                   final String sufix = p == 1
                       ? "à vista (sem juros)"
-                      : "$p x de R$ ${((product.preco * _quantidade * (1 + jur)) / p).toStringAsFixed(2).replaceAll('.', ',')} "
-                          "(${(jur * 100).toStringAsFixed(1)}% juros)";
+                      : "$p x de R\$ ${((product.preco * _quantidade * (1 + jur)) / p).toStringAsFixed(2).replaceAll('.', ',')} "
+                          "(${(jur * 100).toStringAsFixed(1)}% juros/mês)";
                   return DropdownMenuItem(
                     value: p,
                     child: Text(sufix, style: const TextStyle(fontSize: 13)),
@@ -318,7 +320,7 @@ class _ProductBuyScreenState extends State<ProductBuyScreen> {
                         children: [
                           const Text("Subtotal (Sem Juros):", style: TextStyle(fontSize: 14)),
                           Text(
-                            "R$ ${precoBase.toStringAsFixed(2).replaceAll('.', ',')}",
+                            "R\$ ${precoBase.toStringAsFixed(2).replaceAll('.', ',')}",
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                           ),
                         ],
@@ -333,7 +335,7 @@ class _ProductBuyScreenState extends State<ProductBuyScreen> {
                               style: const TextStyle(fontSize: 14, color: Colors.orange),
                             ),
                             Text(
-                              "+ R$ ${(precoBase * taxaJuros).toStringAsFixed(2).replaceAll('.', ',')}",
+                              "+ R\$ ${(precoBase * taxaJuros).toStringAsFixed(2).replaceAll('.', ',')}",
                               style: const TextStyle(fontSize: 14, color: Colors.orange, fontWeight: FontWeight.w500),
                             ),
                           ],
@@ -348,7 +350,7 @@ class _ProductBuyScreenState extends State<ProductBuyScreen> {
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           Text(
-                            "R$ ${totalFinal.toStringAsFixed(2).replaceAll('.', ',')}",
+                            "R\$ ${totalFinal.toStringAsFixed(2).replaceAll('.', ',')}",
                             style: const TextStyle(
                               color: Colors.green,
                               fontWeight: FontWeight.bold,

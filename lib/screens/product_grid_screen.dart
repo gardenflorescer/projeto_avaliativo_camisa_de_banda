@@ -1,9 +1,10 @@
-import 'package:flutter/material';
-import '../datasources/product_datasource.dart'; // Mude para '../app/data/datasource/product_datasource.dart' caso use a estrutura da imagem
+import 'package:flutter/material.dart';
+import '../datasources/product_datasource.dart';
 import '../models/product_model.dart';
 
 class ProductGridScreen extends StatefulWidget {
-  const ProductGridScreen({Key? key}) : super(key: key);
+  // Ajustado para construtor moderno super.key
+  const ProductGridScreen({super.key});
 
   @override
   State<ProductGridScreen> createState() => _ProductGridScreenState();
@@ -76,7 +77,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
       ),
       body: Column(
         children: [
-          // Barra de Pesquisa e Filtros de Preço (RF04)
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Card(
@@ -88,7 +88,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
                   children: [
-                    // Campo de Pesquisa por Título (RF04.1)
                     TextField(
                       decoration: InputDecoration(
                         hintText: "Pesquisar por título...",
@@ -104,7 +103,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    // Filtros de Preço Mín/Máx (RF04.2)
                     Row(
                       children: [
                         Expanded(
@@ -165,8 +163,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
               ),
             ),
           ),
-
-          // Listagem das Camisetas com Lazy Loading simulado pelo ListView/GridView.builder (RF02, RF03)
           Expanded(
             child: _filteredProducts.isEmpty
                 ? const Center(
@@ -202,7 +198,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     );
   }
 
-  // Construtor com fallback inteligente para carregar tanto fotos locais quanto da web (RF05.1)
   Widget _buildProductImage(String url) {
     if (url.startsWith('assets/')) {
       return Image.asset(
@@ -217,11 +212,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                 children: [
                   Icon(Icons.image, color: Colors.grey, size: 30),
                   SizedBox(height: 4),
-                  Text(
-                    "Adicione a imagem na pasta assets",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 9, color: Colors.grey),
-                  ),
+                  Text("Imagem Local", style: TextStyle(fontSize: 10, color: Colors.grey)),
                 ],
               ),
             ),
@@ -271,7 +262,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
-                // Formatação de Dinheiro R$ (RF05.2)
                 Text(
                   "R$ ${product.preco.toStringAsFixed(2).replaceAll('.', ',')}",
                   style: const TextStyle(
@@ -281,7 +271,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                // Botão de Comprar ou Indisponível (RF05.3)
                 SizedBox(
                   width: double.infinity,
                   height: 32,
@@ -296,7 +285,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                             ),
                           ),
                           onPressed: () {
-                            // Navegação via rota nomeada para tela de compra (RF06)
                             Navigator.pushNamed(
                               context,
                               '/compra',

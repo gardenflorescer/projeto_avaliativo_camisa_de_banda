@@ -1,4 +1,4 @@
-import 'package:flutter/material';
+import 'package:flutter/material.dart';
 import 'screens/product_grid_screen.dart';
 import 'screens/product_buy_screen.dart';
 
@@ -7,7 +7,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  // Usando a sintaxe moderna super.key para evitar erros de versão do Dart
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,6 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Inter',
         useMaterial3: true,
       ),
-      // Definindo as rotas nomeadas do aplicativo (RF06, RF07)
       initialRoute: '/',
       routes: {
         '/': (context) => const ProductGridScreen(),
