@@ -166,7 +166,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
             ),
           ),
 
-          // Listagem das Camisetas
+          // Listagem das Camisetas (RF02)
           Expanded(
             child: _filteredProducts.isEmpty
                 ? const Center(
@@ -202,6 +202,48 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     );
   }
 
+  // Construtor do widget da imagem com fallback automático local/remoto (RF05.1)
+  Widget _buildProductImage(String url) {
+    if (url.startsWith('assets/')) {
+      return Image.asset(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[200],
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.image, color: Colors.grey, size: 30),
+                  SizedBox(height: 4),
+                  Text("Imagem Local", style: TextStyle(fontSize: 10, color: Colors.grey)),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    } else {
+      return Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[200],
+            child: const Center(
+              child: Icon(
+                Icons.broken_image,
+                color: Colors.grey,
+                size: 30,
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
   Widget _buildProductCard(ProductModel product) {
     return Card(
       elevation: 3,
@@ -210,24 +252,8 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Imagem do Produto com tratamento de erro (RF05.1)
           Expanded(
-            child: Image.network(
-              product.imagemUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: Icon(
-                      Icons.broken_image,
-                      color: Colors.grey,
-                      size: 40,
-                    ),
-                  ),
-                );
-              },
-            ),
+            child: _buildProductImage(product.imagemUrl),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -307,23 +333,10 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
       clipBehavior: Clip.antiAlias,
       child: Row(
         children: [
-          // Imagem do Produto (RF05.1)
           SizedBox(
             width: 100,
             height: 100,
-            child: Image.network(
-              product.imagemUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.grey[200],
-                  child: const Icon(
-                    Icons.broken_image,
-                    color: Colors.grey,
-                  ),
-                );
-              },
-            ),
+            child: _buildProductImage(product.imagemUrl),
           ),
           Expanded(
             child: Padding(
