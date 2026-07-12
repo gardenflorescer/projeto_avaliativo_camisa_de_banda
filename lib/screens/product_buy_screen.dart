@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/material.dart'; // ✅ Corrigido!
+import 'package:flutter/material.dart';
 import '../models/product_model.dart';
 
 class ProductBuyScreen extends StatefulWidget {

@@ -3,7 +3,6 @@ import '../datasources/product_datasource.dart';
 import '../models/product_model.dart';
 
 class ProductGridScreen extends StatefulWidget {
-  // Ajustado para construtor moderno super.key
   const ProductGridScreen({super.key});
 
   @override
@@ -77,6 +76,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
       ),
       body: Column(
         children: [
+          // Barra de Pesquisa e Filtros de Preço (RF04)
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Card(
@@ -88,6 +88,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
                   children: [
+                    // Campo de Pesquisa
                     TextField(
                       decoration: InputDecoration(
                         hintText: "Pesquisar por título...",
@@ -103,6 +104,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                       },
                     ),
                     const SizedBox(height: 12),
+                    // Filtros de Preço Mín/Máx
                     Row(
                       children: [
                         Expanded(
@@ -110,7 +112,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Preço Mín: R$ ${_minPrice.toStringAsFixed(0)}",
+                                "Preço Mín: R\$ ${_minPrice.toStringAsFixed(0)}",
                                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                               ),
                               Slider(
@@ -136,7 +138,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Preço Máx: R$ ${_maxPrice.toStringAsFixed(0)}",
+                                "Preço Máx: R\$ ${_maxPrice.toStringAsFixed(0)}",
                                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                               ),
                               Slider(
@@ -163,6 +165,8 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
               ),
             ),
           ),
+
+          // Listagem das Camisetas
           Expanded(
             child: _filteredProducts.isEmpty
                 ? const Center(
@@ -198,47 +202,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     );
   }
 
-  Widget _buildProductImage(String url) {
-    if (url.startsWith('assets/')) {
-      return Image.asset(
-        url,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: Colors.grey[200],
-            child: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.image, color: Colors.grey, size: 30),
-                  SizedBox(height: 4),
-                  Text("Imagem Local", style: TextStyle(fontSize: 10, color: Colors.grey)),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    } else {
-      return Image.network(
-        url,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: Colors.grey[200],
-            child: const Center(
-              child: Icon(
-                Icons.broken_image,
-                color: Colors.grey,
-                size: 30,
-              ),
-            ),
-          );
-        },
-      );
-    }
-  }
-
   Widget _buildProductCard(ProductModel product) {
     return Card(
       elevation: 3,
@@ -247,8 +210,24 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Imagem do Produto com tratamento de erro (RF05.1)
           Expanded(
-            child: _buildProductImage(product.imagemUrl),
+            child: Image.network(
+              product.imagemUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey[200],
+                  child: const Center(
+                    child: Icon(
+                      Icons.broken_image,
+                      color: Colors.grey,
+                      size: 40,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -262,8 +241,9 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
+                // Formatação de Dinheiro R$ (RF05.2)
                 Text(
-                  "R$ ${product.preco.toStringAsFixed(2).replaceAll('.', ',')}",
+                  "R\$ ${product.preco.toStringAsFixed(2).replaceAll('.', ',')}",
                   style: const TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
@@ -271,6 +251,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
+                // Botão de Comprar ou Indisponível (RF05.3)
                 SizedBox(
                   width: double.infinity,
                   height: 32,
@@ -285,6 +266,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                             ),
                           ),
                           onPressed: () {
+                            // Navegação via rota nomeada para tela de compra (RF06)
                             Navigator.pushNamed(
                               context,
                               '/compra',
@@ -325,10 +307,23 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
       clipBehavior: Clip.antiAlias,
       child: Row(
         children: [
+          // Imagem do Produto (RF05.1)
           SizedBox(
             width: 100,
             height: 100,
-            child: _buildProductImage(product.imagemUrl),
+            child: Image.network(
+              product.imagemUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey[200],
+                  child: const Icon(
+                    Icons.broken_image,
+                    color: Colors.grey,
+                  ),
+                );
+              },
+            ),
           ),
           Expanded(
             child: Padding(
@@ -344,7 +339,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "R$ ${product.preco.toStringAsFixed(2).replaceAll('.', ',')}",
+                    "R\$ ${product.preco.toStringAsFixed(2).replaceAll('.', ',')}",
                     style: const TextStyle(
                       color: Colors.green,
                       fontWeight: FontWeight.bold,
