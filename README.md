@@ -2,7 +2,9 @@
 
 Este é o projeto avaliativo do **Módulo 1** do curso **Desenvolvimento com Dart e Flutter** do **SCTEC**. O aplicativo é um catálogo interativo de camisetas de bandas de rock clássicas, contendo funcionalidades de listagem (grade/lista), filtros dinâmicos de pesquisa, e fluxo completo de fechamento de pedido com validação rigorosa de dados e simulação de envio para serviço backend em formato JSON.
 
----
+## 🎓 VIDEO GOOGLE DRIVE
+https://drive.google.com/file/d/1tEUaOU9DfG4Ij9xeEO9XyrBw9-vlk26t/view?usp=sharing
+
 
 ## 🚀 Como Executar o Projeto
 
@@ -107,3 +109,5 @@ Se tivéssemos mais tempo para evoluir o sistema, as melhorias prioritárias ser
 *Trilha de Desenvolvimento de Software — Especialização em Flutter*  
 Aluno: **RAYRON SOUSA MOURA**  
 Data: Julho / 2026
+
+
